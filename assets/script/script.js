@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
   class updateView {
     constructor(counter) {
       this.counter = counter;
+      this.display = document.querySelector(".js-display"); 
     }
     increment() {
       this.counter++;
@@ -12,43 +13,78 @@ document.addEventListener("DOMContentLoaded", () => {
       this.updateDisplay();
     }
     updateDisplay() {
-      return (display.innerText = this.counter);
+      this.display.innerText = this.counter;
     }
   }
 
-  const container = document.querySelector(".view-text");
+  const elementsConfig = [
+    {
+      tag: "span",
+      className: "js-display",
+      textContent: "0",
+    },
+    {
+      tag: "div",
+      className: "js-view",
+      children: [
+        {
+          tag: "button",
+          className: "js-button",
+          textContent: "+",
+          dataAction: "increment",
+        },
+        {
+          tag: "button",
+          className: "js-button",
+          textContent: "-",
+          dataAction: "decrement",
+        }
+      ]
+    }
+  ];
 
-  const createButton = (text, action) => {
-    const btn = document.createElement("button");
-    btn.textContent = text;
-    btn.dataset.action = action;
-    btn.classList.add("js-button");
-    return btn;
-  };
+const container = document.querySelector(".view-text");
 
-  const display = Object.assign(document.createElement("span"), {
-    textContent: "0",
-    className: "js-display",
-  });
+const createView = (element) => {
+  const tmp = document.createElement(element.tag);
 
-  const buttonView = Object.assign(document.createElement("div"), {
-    className: "js-view",
-  });
+  if (element.className) {
+    tmp.className=element.className;
+  }
 
-  const minButton = createButton("-", "decrement");
-  const plusButton = createButton("+", "increment");
+  if (element.textContent) {
+    tmp.textContent = element.textContent;
+  }
 
-  buttonView.append(minButton, plusButton);
-  container.append(display, buttonView);
+  if (element.dataAction) {
+    tmp.dataset.action = element.dataAction;
+  }
+
+  if (element.children) {
+    element.children.forEach(child => {
+      const childtmp = createView(child); 
+      tmp.appendChild(childtmp);
+    });
+  }
+
+  return tmp;
+};
+
+for (let element of elementsConfig) {
+  const tmp = createView(element);
+  container.appendChild(tmp);
+}
 
   let counter = 0;
   const view = new updateView(counter);
 
-  buttonView.addEventListener("click", (event) => {
+  container.addEventListener("click", (event) => {
     const btn = event.target.closest(".js-button");
+    console.log(btn);
     if (!btn) return;
 
     const action = btn.dataset.action;
+    console.log(action);
 
     if (action === "increment") {
       view.increment(counter);
